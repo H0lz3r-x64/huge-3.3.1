@@ -38,13 +38,13 @@ return array(
      * Configuration for: Folders
      * Usually there's no reason to change this.
      */
-    'PATH_CONTROLLER' => realpath(dirname(__FILE__).'/../../') . '/application/controller/',
-    'PATH_VIEW' => realpath(dirname(__FILE__).'/../../') . '/application/view/',
+    'PATH_CONTROLLER' => realpath(dirname(__FILE__) . '/../../') . '/application/controller/',
+    'PATH_VIEW' => realpath(dirname(__FILE__) . '/../../') . '/application/view/',
     /**
      * Configuration for: Avatar paths
      * Internal path to save avatars. Make sure this folder is writable. The slash at the end is VERY important!
      */
-    'PATH_AVATARS' => realpath(dirname(__FILE__).'/../../') . '/public/avatars/',
+    'PATH_AVATARS' => realpath(dirname(__FILE__) . '/../../') . '/public/avatars/',
     'PATH_AVATARS_PUBLIC' => 'avatars/',
     /**
      * Configuration for: Default controller and action
@@ -65,7 +65,7 @@ return array(
     'DB_HOST' => '127.0.0.1',
     'DB_NAME' => 'huge',
     'DB_USER' => 'root',
-    'DB_PASS' => '12345678',
+    'DB_PASS' => '',
     'DB_PORT' => '3306',
     'DB_CHARSET' => 'utf8',
     /**
