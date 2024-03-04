@@ -4,6 +4,7 @@
  * Class View
  * The part that handles all the output
  */
+#[AllowDynamicProperties]
 class View
 {
     /**
@@ -48,7 +49,7 @@ class View
 
         require Config::get('PATH_VIEW') . '_templates/header.php';
 
-        foreach($filenames as $filename) {
+        foreach ($filenames as $filename) {
             require Config::get('PATH_VIEW') . $filename . '.php';
         }
 
@@ -156,7 +157,7 @@ class View
         $navigation_controller = $split_filename[0];
         $navigation_action = $split_filename[1];
 
-        if ($active_controller == $navigation_controller AND $active_action == $navigation_action) {
+        if ($active_controller == $navigation_controller and $active_action == $navigation_action) {
             return true;
         }
 

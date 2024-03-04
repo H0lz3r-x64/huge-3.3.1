@@ -67,8 +67,8 @@ class RegisterController extends Controller
      * moment the end-user requests the <img .. >
      * Maybe refactor this sometime.
      */
-    public function showCaptcha()
-    {
-        CaptchaModel::generateAndShowCaptcha();
-    }
+    // public function showCaptcha()
+    // {
+    //     CaptchaModel::generateAndShowCaptcha();
+    // }
 }
