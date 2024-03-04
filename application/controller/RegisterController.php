@@ -20,12 +20,24 @@ class RegisterController extends Controller
      * Register page
      * Show the register form, but redirect to main-page if user is already logged-in
      */
+    /**
+     * Renders the registration page if the user is an admin.
+     * If the user is not an admin, it checks if the user is logged in.
+     * If the user is logged in, it redirects to the home page.
+     * If the user is not logged in, it redirects to the login page.
+     *
+     * @return void
+     */
     public function index()
     {
-        if (LoginModel::isUserLoggedIn()) {
-            Redirect::home();
-        } else {
+        if (Session::get("user_account_type") == 7) {
             $this->View->render('register/index');
+        } else {
+            if (LoginModel::isUserLoggedIn()) {
+                Redirect::home();
+            } else {
+                Redirect::to('login/index');
+            }
         }
     }
 
@@ -35,12 +47,14 @@ class RegisterController extends Controller
      */
     public function register_action()
     {
-        $registration_successful = RegistrationModel::registerNewUser();
+        if (Session::get("user_account_type") == 7) {
+            $registration_successful = RegistrationModel::registerNewUser();
 
-        if ($registration_successful) {
-            Redirect::to('login/index');
-        } else {
-            Redirect::to('register/index');
+            if ($registration_successful) {
+                Redirect::to('login/index');
+            } else {
+                Redirect::to('register/index');
+            }
         }
     }
 
