@@ -15,29 +15,47 @@
         <div>
             <table class="overview-table">
                 <thead>
-                <tr>
-                    <td>Id</td>
-                    <td>Avatar</td>
-                    <td>Username</td>
-                    <td>User's email</td>
-                    <td>Activated ?</td>
-                    <td>Link to user's profile</td>
-                    <td>suspension Time in days</td>
-                    <td>Soft delete</td>
-                    <td>Submit</td>
-                </tr>
+                    <tr>
+                        <td>Id</td>
+                        <td>Avatar</td>
+                        <td>Username</td>
+                        <td>User's email</td>
+                        <td>Activated ?</td>
+                        <td>User Type</td>
+                        <td>Link to user's profile</td>
+                        <td>suspension Time in days</td>
+                        <td>Soft delete</td>
+                        <td>Submit</td>
+                    </tr>
                 </thead>
                 <?php foreach ($this->users as $user) { ?>
                     <tr class="<?= ($user->user_active == 0 ? 'inactive' : 'active'); ?>">
-                        <td><?= $user->user_id; ?></td>
+                        <td>
+                            <?= $user->user_id; ?>
+                        </td>
                         <td class="avatar">
                             <?php if (isset($user->user_avatar_link)) { ?>
-                                <img src="<?= $user->user_avatar_link; ?>"/>
+                                <img src="<?= $user->user_avatar_link; ?>" />
                             <?php } ?>
                         </td>
-                        <td><?= $user->user_name; ?></td>
-                        <td><?= $user->user_email; ?></td>
-                        <td><?= ($user->user_active == 0 ? 'No' : 'Yes'); ?></td>
+                        <td>
+                            <?= $user->user_name; ?>
+                        </td>
+                        <td>
+                            <?= $user->user_email; ?>
+                        </td>
+                        <td>
+                            <?= ($user->user_active == 0 ? 'No' : 'Yes'); ?>
+                        </td>
+                        <td>
+                            <select name="user_type_select">
+                                <?php foreach ($this->user_types as $type) { ?>
+                                    <option value="<?= $type->type_id; ?>" <?= ($user->user_type == $type->type_name) ? 'selected' : ''; ?>>
+                                        <?= $type->type_name; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </td>
                         <td>
                             <a href="<?= Config::get('URL') . 'profile/showProfile/' . $user->user_id; ?>">Profile</a>
                         </td>
@@ -55,3 +73,10 @@
         </div>
     </div>
 </div>
+
+<!-- Apply DataTables to your table -->
+<script>
+    $(document).ready(function () {
+        $(' .overview-table').DataTable();
+    });
+</script>

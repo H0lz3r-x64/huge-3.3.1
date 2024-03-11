@@ -19,7 +19,9 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "SELECT user_id, user_name, user_email, user_active, user_has_avatar, user_deleted FROM users";
+        $sql = "SELECT users.user_id, users.user_name, users.user_email, users.user_active, users.user_has_avatar, users.user_deleted, user_types.type_name 
+            FROM users 
+            INNER JOIN user_types ON users.user_account_type = user_types.type_id";
         $query = $database->prepare($sql);
         $query->execute();
 
@@ -27,9 +29,6 @@ class UserModel
 
         foreach ($query->fetchAll() as $user) {
 
-            // all elements of array passed to Filter::XSSFilter for XSS sanitation, have a look into
-            // application/core/Filter.php for more info on how to use. Removes (possibly bad) JavaScript etc from
-            // the user's values
             array_walk_recursive($user, 'Filter::XSSFilter');
 
             $all_users_profiles[$user->user_id] = new stdClass();
@@ -38,11 +37,35 @@ class UserModel
             $all_users_profiles[$user->user_id]->user_email = $user->user_email;
             $all_users_profiles[$user->user_id]->user_active = $user->user_active;
             $all_users_profiles[$user->user_id]->user_deleted = $user->user_deleted;
+            $all_users_profiles[$user->user_id]->user_type = $user->type_name;
             $all_users_profiles[$user->user_id]->user_avatar_link = (Config::get('USE_GRAVATAR') ? AvatarModel::getGravatarLinkByEmail($user->user_email) : AvatarModel::getPublicAvatarFilePathOfUser($user->user_has_avatar, $user->user_id));
         }
 
         return $all_users_profiles;
     }
+
+    /**
+     * Retrieves all user types from the database.
+     *
+     * @return array An array containing all the user types.
+     */
+    public static function getAllUserTypes()
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
+        $sql = "SELECT type_id, type_name FROM user_types";
+        $query = $database->prepare($sql);
+        $query->execute();
+        $all_users_types = array();
+        foreach ($query->fetchAll() as $user_type) {
+
+            array_walk_recursive($user_type, 'Filter::XSSFilter');
+            $all_users_types[$user_type->type_id] = new stdClass();
+            $all_users_types[$user_type->type_id]->type_id = $user_type->type_id;
+            $all_users_types[$user_type->type_id]->type_name = $user_type->type_name;
+        }
+        return $all_users_types;
+    }
+
 
     /**
      * Gets a user's profile data, according to the given $user_id
