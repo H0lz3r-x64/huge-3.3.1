@@ -40,7 +40,7 @@ class AdminModel
 
         // if suspension or deletion should happen, then also kick user out of the application instantly by resetting
         // the user's session :)
-        if ($suspensionTime != null OR $delete = 1) {
+        if ($suspensionTime != null or $delete = 1) {
             self::resetUserSession($userId);
         }
     }
@@ -58,11 +58,13 @@ class AdminModel
         $database = DatabaseFactory::getFactory()->getConnection();
 
         $query = $database->prepare("UPDATE users SET user_suspension_timestamp = :user_suspension_timestamp, user_deleted = :user_deleted  WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(
+        $query->execute(
+            array(
                 ':user_suspension_timestamp' => $suspensionTime,
                 ':user_deleted' => $delete,
                 ':user_id' => $userId
-        ));
+            )
+        );
 
         if ($query->rowCount() == 1) {
             Session::add('feedback_positive', Text::get('FEEDBACK_ACCOUNT_SUSPENSION_DELETION_STATUS'));
@@ -82,10 +84,12 @@ class AdminModel
         $database = DatabaseFactory::getFactory()->getConnection();
 
         $query = $database->prepare("UPDATE users SET session_id = :session_id  WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(
+        $query->execute(
+            array(
                 ':session_id' => null,
                 ':user_id' => $userId
-        ));
+            )
+        );
 
         if ($query->rowCount() == 1) {
             Session::add('feedback_positive', Text::get('FEEDBACK_ACCOUNT_USER_SUCCESSFULLY_KICKED'));

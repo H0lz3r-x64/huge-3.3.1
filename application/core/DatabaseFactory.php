@@ -32,7 +32,8 @@ class DatabaseFactory
         return self::$factory;
     }
 
-    public function getConnection() {
+    public function getConnection()
+    {
         if (!$this->database) {
 
             /**
@@ -44,10 +45,12 @@ class DatabaseFactory
             try {
                 $options = array(PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ, PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING);
                 $this->database = new PDO(
-                   Config::get('DB_TYPE') . ':host=' . Config::get('DB_HOST') . ';dbname=' .
-                   Config::get('DB_NAME') . ';port=' . Config::get('DB_PORT') . ';charset=' . Config::get('DB_CHARSET'),
-                   Config::get('DB_USER'), Config::get('DB_PASS'), $options
-                   );
+                    Config::get('DB_TYPE') . ':host=' . Config::get('DB_HOST') . ';dbname=' .
+                    Config::get('DB_NAME') . ';port=' . Config::get('DB_PORT') . ';charset=' . Config::get('DB_CHARSET'),
+                    Config::get('DB_USER'),
+                    Config::get('DB_PASS'),
+                    $options
+                );
             } catch (PDOException $e) {
 
                 // Echo custom message. Echo error code gives you some info.

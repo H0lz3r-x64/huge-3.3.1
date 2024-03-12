@@ -17,7 +17,7 @@ class UserModel
      */
     public static function getPublicProfilesOfAllUsers()
     {
-        $database = DatabaseFactory::getFactory()->getConnection();
+        $database = DatabaseFactoryMysqli::getFactory()->getConnection();
 
         $sql = "SELECT users.user_id, users.user_name, users.user_email, users.user_active, users.user_has_avatar, users.user_deleted, user_types.type_name 
             FROM users 
