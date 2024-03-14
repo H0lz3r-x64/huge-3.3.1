@@ -47,19 +47,21 @@
                         <td>
                             <?= ($user->user_active == 0 ? 'No' : 'Yes'); ?>
                         </td>
-                        <td>
-                            <select name="user_type_select">
-                                <?php foreach ($this->user_types as $type) { ?>
-                                    <option value="<?= $type->type_id; ?>" <?= ($user->user_type == $type->type_name) ? 'selected' : ''; ?>>
-                                        <?= $type->type_name; ?>
-                                    </option>
-                                <?php } ?>
-                            </select>
-                        </td>
+
                         <td>
                             <a href="<?= Config::get('URL') . 'profile/showProfile/' . $user->user_id; ?>">Profile</a>
                         </td>
                         <form action="<?= config::get("URL"); ?>admin/actionAccountSettings" method="post">
+                            <td>
+                                <select name="user_type_select">
+                                    <?php foreach ($this->user_types as $type) { ?>
+                                        <option value="<?= $type->type_id; ?>" <?= ($user->user_type == $type->type_name) ? 'selected' : ''; ?>>
+                                            <?= $type->type_name; ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                            </td>
+
                             <td><input type="number" name="suspension" /></td>
                             <td><input type="checkbox" name="softDelete" <?php if ($user->user_deleted) { ?> checked <?php } ?> /></td>
                             <td>
@@ -74,7 +76,6 @@
     </div>
 </div>
 
-<!-- Apply DataTables to your table -->
 <script>
     $(document).ready(function () {
         $(' .overview-table').DataTable();

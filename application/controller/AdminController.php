@@ -33,7 +33,8 @@ class AdminController extends Controller
         AdminModel::setAccountSuspensionAndDeletionStatus(
             Request::post('suspension'),
             Request::post('softDelete'),
-            Request::post('user_id')
+            Request::post('user_id'),
+            Request::post('user_type_select')
         );
 
         Redirect::to("admin");

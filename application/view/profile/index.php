@@ -54,3 +54,9 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $(' .overview-table').DataTable();
+    });
+</script>
