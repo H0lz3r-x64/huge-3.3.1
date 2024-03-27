@@ -15,10 +15,20 @@ class MessageController extends Controller
         $this->View->render(
             'message/index',
             array(
-                'messages' => MessageModel::getMessages(Session::get('user_id')),
                 'unreadCount' => MessageModel::getUnreadCount(Session::get('user_id')),
                 'users' => UserModel::getPublicProfilesOfAllUsers(),
                 'chats' => MessageModel::getUsersUserMessaged(Session::get('user_id'))
+            )
+        );
+    }
+
+    public function chat($receiver_id)
+    {
+        $this->View->render(
+            'message/chat',
+            array(
+                'messages' => MessageModel::getMessagesWithUser($receiver_id),
+                'user' => UserModel::getPublicProfileOfUser($receiver_id)
             )
         );
     }

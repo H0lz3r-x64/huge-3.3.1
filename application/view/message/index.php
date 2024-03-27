@@ -12,7 +12,7 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
 
-            <form action="<?= Config::get('URL') ?>message/create" method="post">
+            <form action="<?= Config::get('URL') ?>message/chat/" method="post">
                 <div class="row">
                     Open Chat with
                     <select id="user_search" name="receiver_id" style="width: 100%;">
