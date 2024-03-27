@@ -12,7 +12,7 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
 
-            <form action="<?= Config::get('URL') ?>message/chat/" method="post">
+            <form id="openChatForm" method="post">
                 <div class="row">
                     Open Chat with
                     <select id="user_search" name="receiver_id" style="width: 100%;">
@@ -33,6 +33,15 @@
             $('#user_search').select2({
                 templateResult: formatUser,
                 templateSelection: formatUserSelection
+            });
+
+            $('#openChatForm').submit(function (event) {
+                event.preventDefault(); // Prevent form submission
+
+                var selectedOption = $('#user_search option:selected').val().split(',')[0];
+                var redirectUrl = '<?= Config::get('URL') ?>message/chat/' + selectedOption;
+
+                window.location.href = redirectUrl;
             });
 
             var $modal = $("#myModal");
@@ -120,7 +129,7 @@
             margin: 15% auto;
             padding: 15px;
             border: 1px solid #888;
-            width: 50%;
+            width: 620px;
             border-radius: 15px;
         }
 
