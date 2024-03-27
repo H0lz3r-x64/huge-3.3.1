@@ -3,3 +3,6 @@
 /nbproject/private/
 # don't commit all the dependencies fetched via Composer
 /vendor/
+
+# don't commit the avatars uploaded by users
+/public/avatars/
