@@ -1,22 +1,25 @@
 <?php
 class MessageModel
 {
-    public static function sendMessage($senderId, $receiverId, $message)
+    public static function sendMessage($senderId, $receiverId, $message): int
     {
         $db = DatabaseFactory::getFactory()->getConnection();
         $stmt = $db->prepare("INSERT INTO messages (sender_id, receiver_id, message, timestamp, read_status) VALUES (:sender, :receiver, :message, NOW(), 0)");
         $stmt->execute([':sender' => $senderId, ':receiver' => $receiverId, ':message' => $message]);
+
+        // Return the ID of the new auto-incremented message
+        return $db->lastInsertId();
     }
 
-    public static function getMessages($userId)
+    public static function getMessageById($id)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM messages WHERE sender_id = :user OR receiver_id = :user ORDER BY timestamp ASC");
-        $stmt->execute([':user' => $userId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare("SELECT DISTINCT * FROM messages WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
     }
 
-    public static function getMessagesWithUser($userId)
+    public static function getMessagesByUser($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
 
@@ -76,5 +79,12 @@ class MessageModel
         return $stmt->fetchColumn();
     }
 
+    public static function getNewMessages($receiverId)
+    {
+        $db = DatabaseFactory::getFactory()->getConnection();
+        $stmt = $db->prepare("SELECT * FROM messages WHERE receiver_id = :receiver_id AND read_status = 0");
+        $stmt->execute([':receiver_id' => $receiverId]);
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 
 }

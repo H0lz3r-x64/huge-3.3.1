@@ -14,10 +14,11 @@
     <!-- select2 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
-    <!-- Include jQuery, DataTables and select2 -->
+    <!-- Include jQuery, DataTables, select2, pusher -->
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 </head>
 
 <body>

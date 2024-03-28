@@ -48,6 +48,32 @@
                 }
             });
 
+            // scroll the history down on page load and after new message got sent
+            $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
+
+            function appendMessage(message) {
+                var messageClass = message.sender_id == '<?= Session::get('user_id') ?>' ? 'sent' : 'received';
+                var messageHtml = '<div class="message ' + messageClass + '">' +
+                    '<div class="message-content">' + message.message + '</div>' +
+                    '<div class="message-timestamp">' + message.timestamp + '</div>' +
+                    '</div>';
+                $('.message-container').append(messageHtml);
+                // scroll the history down on page load and after new message got sent
+                $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
+            }
+
+            var pusher = new Pusher('6f54e32cbe2ebd14f7d6', {
+                cluster: 'eu'
+            });
+
+            var channel = pusher.subscribe('my-channel');
+            channel.bind('my-event', function (data) {
+                // Fetch new messages
+                var newMessage = data.message;
+                appendMessage(newMessage);
+            });
+
+
             // when the chat history is hovered, focus on it to enable scrolling with the mouse wheel
             $('.chat-history').hover(function () {
                 $(this).focus();
@@ -63,23 +89,18 @@
                         receiver_id: $('#receiver_id').val(),
                         message: $('#message-text').val()
                     },
-                    success: function () {
-                        console.log('success');
-                        location.reload();
+                    success: function (response) {
+                        // Clear the message input
+                        $('#message-text').val('');
                     },
                     error: function (xhr, status, error) {
                         console.log('An error occurred: ' + error);
                         alert('An error occurred: ' + error);
-                    },
-                    complete: function () {
-                        $('#message-text').val('');
-                        console.log("complete");
                     }
                 });
             });
 
-            // scroll the history down on page load and after new message got sent
-            $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
+
         });
     </script>
 

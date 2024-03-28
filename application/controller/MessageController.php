@@ -27,7 +27,7 @@ class MessageController extends Controller
         $this->View->render(
             'message/chat',
             array(
-                'messages' => MessageModel::getMessagesWithUser($receiver_id),
+                'messages' => MessageModel::getMessagesByUser($receiver_id),
                 'user' => UserModel::getPublicProfileOfUser($receiver_id)
             )
         );
@@ -42,16 +42,34 @@ class MessageController extends Controller
                 throw new Exception('Message cannot be empty.');
             }
 
-            MessageModel::sendMessage(
+            $msgId = MessageModel::sendMessage(
                 Session::get('user_id'),
                 Request::post('receiver_id'),
                 $message
             );
 
+            $new_message = MessageModel::getMessageById($msgId);
+
             echo json_encode(['status' => 'success']);
         } catch (Exception $e) {
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            echo json_encode(['status' => 'error', 'errorMessage' => $e->getMessage()]);
+            return;
         }
+
+        // Trigger a Pusher event
+        $options = array(
+            'cluster' => 'eu',
+            'useTLS' => true
+        );
+        $pusher = new Pusher\Pusher(
+            '6f54e32cbe2ebd14f7d6',
+            '7820e477bc4efdabc29f',
+            '1778841',
+            $options
+        );
+
+        $data['message'] = $new_message;
+        $pusher->trigger('my-channel', 'my-event', $data);
     }
 
     public function markAsRead()
@@ -62,5 +80,17 @@ class MessageController extends Controller
         );
 
         echo json_encode(['status' => 'success']);
+    }
+
+    public function getNewMessages()
+    {
+        // Get the receiver ID from the POST data
+        $receiverId = $_POST['receiver_id'];
+
+        // Fetch the new messages from the database
+        $new_messages = MessageModel::getNewMessages($receiverId);
+
+        // Return the messages as a JSON string
+        echo json_encode(['status' => 'success', 'messages' => $new_messages]);
     }
 }
