@@ -30,5 +30,8 @@
         "platform": {
             "php": "8.2.15"
         }
+    },
+    "require": {
+        "pusher/pusher-php-server": "^7.2"
     }
 }
