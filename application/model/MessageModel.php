@@ -19,7 +19,15 @@ class MessageModel
     public static function getMessagesWithUser($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM messages WHERE (sender_id = :user OR receiver_id = :user) AND (sender_id = :other OR receiver_id = :other) ORDER BY timestamp ASC");
+
+        if ($userId == Session::get('user_id')) {
+            // If chatting with self, only select messages where both sender_id and receiver_id are the user's ID
+            $stmt = $db->prepare("SELECT * FROM messages WHERE sender_id = :user AND receiver_id = :user ORDER BY timestamp ASC");
+        } else {
+            // Otherwise, select messages where either sender_id or receiver_id is the user's ID and the other is the other user's ID
+            $stmt = $db->prepare("SELECT * FROM messages WHERE (sender_id = :user AND receiver_id = :other) OR (sender_id = :other AND receiver_id = :user) ORDER BY timestamp ASC");
+        }
+
         $stmt->execute([':user' => Session::get('user_id'), ':other' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
