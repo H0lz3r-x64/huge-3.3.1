@@ -191,7 +191,15 @@
     <div class="container" style="margin-top: 0px;">
         <?php foreach ($data['chats'] as $chat): ?>
             <div class="chat-card">
-                <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
+                <div style="position: relative;">
+                    <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
+                    <?php if ($chat->unreadCount > 0): ?>
+                        <div
+                            style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;">
+                            <?= $chat->unreadCount ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <div>
                     <div class="info">
                         <div class="name">

@@ -37,12 +37,12 @@ class MessageModel
 
     public static function getUsersUserMessaged($userId)
     {
-
         $db = DatabaseFactory::getFactory()->getConnection();
         $stmt = $db->prepare("SELECT CASE 
                 WHEN sender_id = :user THEN receiver_id ELSE sender_id END AS user_id, MAX(timestamp) as timestamp,
                 (SELECT message FROM messages WHERE (sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id) ORDER BY timestamp DESC LIMIT 1) as last_message,
-                (SELECT sender_id FROM messages WHERE (sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id) ORDER BY timestamp DESC LIMIT 1) as last_sender_id
+                (SELECT sender_id FROM messages WHERE (sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id) ORDER BY timestamp DESC LIMIT 1) as last_sender_id,
+                (SELECT COUNT(*) FROM messages WHERE receiver_id = :user AND sender_id = user_id AND read_status = 0) as unreadCount
             FROM messages 
             WHERE sender_id = :user OR receiver_id = :user
             GROUP BY user_id ORDER BY timestamp DESC
@@ -60,6 +60,7 @@ class MessageModel
             $chats[$chat->user_id]->timestamp = $chat->timestamp;
             $chats[$chat->user_id]->last_message = ($chat->last_sender_id == $userId ? "You: " : $chats[$chat->user_id]->user_name . ": ") . $chat->last_message;
             $chats[$chat->user_id]->user_avatar_link = $userdata->user_avatar_link;
+            $chats[$chat->user_id]->unreadCount = $chat->unreadCount;
         }
         return $chats;
     }
