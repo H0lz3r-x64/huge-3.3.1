@@ -16,8 +16,11 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        $this->View->render('profile/index', array(
-            'users' => UserModel::getPublicProfilesOfAllUsers())
+        $this->View->render(
+            'profile/index',
+            array(
+                'users' => UserModel::getPublicProfilesOfAllUsers()
+            )
         );
     }
 
@@ -29,8 +32,11 @@ class ProfileController extends Controller
     public function showProfile($user_id)
     {
         if (isset($user_id)) {
-            $this->View->render('profile/showProfile', array(
-                'user' => UserModel::getPublicProfileOfUser($user_id))
+            $this->View->render(
+                'profile/showProfile',
+                array(
+                    'user' => UserModel::getPublicProfileOfUser($user_id)
+                )
             );
         } else {
             Redirect::home();
