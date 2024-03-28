@@ -68,6 +68,7 @@ class MessageController extends Controller
             );
 
             $data['message'] = $new_message;
+            // 2 channels; one for the receiver to receive the message and one for the sender to receive their own message
             $chat_channels = ['chat_sender' . $sender_id . 'receiver' . $receiver_id, 'message', 'chat_sender' . $receiver_id . 'receiver' . $sender_id, 'message'];
             $pusher->trigger($chat_channels, 'message', $data);
         } catch (Exception $e) {
