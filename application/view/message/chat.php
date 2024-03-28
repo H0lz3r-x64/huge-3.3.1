@@ -1,13 +1,16 @@
 <div class="container">
     <!-- Info bar -->
     <div class="chat-card">
+
         <img src="<?= $data['user']->user_avatar_link ?>" alt="user avatar">
         <div class="info">
             <div class="name">
                 <?= $data['user']->user_name ?>
             </div>
         </div>
-        <a href="<?= Config::get('URL') ?>message/chat/<?= $data['user']->user_id ?>" class="stretched-link"></a>
+        <!-- Go Back button -->
+        <button class="go-back-button" onclick="window.location.href='<?= Config::get('URL') ?>message/index'">&#8592;
+            Go Back</button>
     </div>
 
     <!-- Messages -->
@@ -36,6 +39,20 @@
 
     <script>
         $(document).ready(function () {
+            // sends an AJAX request to the markAsRead method when the chat view is loaded.
+            $.ajax({
+                url: '<?= Config::get('URL') ?>message/markAsRead',
+                type: 'post',
+                data: {
+                    receiver_id: '<?= $data['user']->user_id ?>'
+                }
+            });
+
+            // when the chat history is hovered, focus on it to enable scrolling with the mouse wheel
+            $('.chat-history').hover(function () {
+                $(this).focus();
+            });
+
             $('#message-form').on('submit', function (e) {
                 e.preventDefault();
 
@@ -60,11 +77,28 @@
                     }
                 });
             });
+
+            // scroll the history down on page load and after new message got sent
             $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
         });
     </script>
 
     <style>
+        .go-back-button {
+            justify-self: end;
+            /* Change this from left to right */
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff !important;
+            color: white;
+            cursor: pointer;
+        }
+
+        .go-back-button:hover {
+            background-color: #222 !important;
+        }
+
         .chat-history {
             position: relative;
             margin: 0 auto;
@@ -149,7 +183,7 @@
 
         .chat-card {
             display: grid;
-            grid-template-columns: 50px auto;
+            grid-template-columns: 50px auto 89px;
             grid-gap: 10px;
             align-items: center;
             padding: 10px;

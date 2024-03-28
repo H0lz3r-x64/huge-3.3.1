@@ -56,7 +56,11 @@ class MessageController extends Controller
 
     public function markAsRead()
     {
-        MessageModel::markAsRead(Request::post('message_id'));
-        Redirect::to('message');
+        MessageModel::markAsRead(
+            Session::get('user_id'),
+            Request::post('receiver_id')
+        );
+
+        echo json_encode(['status' => 'success']);
     }
 }

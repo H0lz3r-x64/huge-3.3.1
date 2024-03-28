@@ -61,11 +61,11 @@ class MessageModel
         return $chats;
     }
 
-    public static function markAsRead($messageId)
+    public static function markAsRead($userId, $senderId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("UPDATE messages SET read_status = 1 WHERE id = :id");
-        $stmt->execute([':id' => $messageId]);
+        $stmt = $db->prepare("UPDATE messages SET read_status = 1 WHERE receiver_id = :receiver_id AND sender_id = :sender_id AND read_status = 0");
+        $stmt->execute([':receiver_id' => $userId, ':sender_id' => $senderId]);
     }
 
     public static function getUnreadCount($userId)
