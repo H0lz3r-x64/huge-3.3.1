@@ -37,39 +37,43 @@ class MessageController extends Controller
     {
         try {
             $message = Request::post('message');
+            $sender_id = Session::get('user_id');
+            $receiver_id = Request::post('receiver_id');
 
             if (empty($message)) {
                 throw new Exception('Message cannot be empty.');
             }
 
             $msgId = MessageModel::sendMessage(
-                Session::get('user_id'),
-                Request::post('receiver_id'),
+                $sender_id,
+                $receiver_id,
                 $message
             );
 
             $new_message = MessageModel::getMessageById($msgId);
 
             echo json_encode(['status' => 'success']);
+
+
+            // Trigger a Pusher event
+            $options = array(
+                'cluster' => 'eu',
+                'useTLS' => true
+            );
+            $pusher = new Pusher\Pusher(
+                '6f54e32cbe2ebd14f7d6',
+                '7820e477bc4efdabc29f',
+                '1778841',
+                $options
+            );
+
+            $data['message'] = $new_message;
+            $chat_channels = ['chat_sender' . $sender_id . 'receiver' . $receiver_id, 'message', 'chat_sender' . $receiver_id . 'receiver' . $sender_id, 'message'];
+            $pusher->trigger($chat_channels, 'message', $data);
         } catch (Exception $e) {
             echo json_encode(['status' => 'error', 'errorMessage' => $e->getMessage()]);
             return;
         }
-
-        // Trigger a Pusher event
-        $options = array(
-            'cluster' => 'eu',
-            'useTLS' => true
-        );
-        $pusher = new Pusher\Pusher(
-            '6f54e32cbe2ebd14f7d6',
-            '7820e477bc4efdabc29f',
-            '1778841',
-            $options
-        );
-
-        $data['message'] = $new_message;
-        $pusher->trigger('my-channel', 'my-event', $data);
     }
 
     public function markAsRead()

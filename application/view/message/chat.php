@@ -66,8 +66,8 @@
                 cluster: 'eu'
             });
 
-            var channel = pusher.subscribe('my-channel');
-            channel.bind('my-event', function (data) {
+            var channel = pusher.subscribe('chat_sender<?= Session::get('user_id') ?>receiver<?= $data['user']->user_id ?>');
+            channel.bind('message', function (data) {
                 // Fetch new messages
                 var newMessage = data.message;
                 appendMessage(newMessage);
