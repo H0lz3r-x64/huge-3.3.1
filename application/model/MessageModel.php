@@ -11,7 +11,7 @@ class MessageModel
     public static function getMessages($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM messages WHERE sender_id = :user OR receiver_id = :user ORDER BY timestamp DESC");
+        $stmt = $db->prepare("SELECT * FROM messages WHERE sender_id = :user OR receiver_id = :user ORDER BY timestamp ASC");
         $stmt->execute([':user' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -19,7 +19,7 @@ class MessageModel
     public static function getMessagesWithUser($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM messages WHERE (sender_id = :user OR receiver_id = :user) AND (sender_id = :other OR receiver_id = :other) ORDER BY timestamp DESC");
+        $stmt = $db->prepare("SELECT * FROM messages WHERE (sender_id = :user OR receiver_id = :user) AND (sender_id = :other OR receiver_id = :other) ORDER BY timestamp ASC");
         $stmt->execute([':user' => Session::get('user_id'), ':other' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -34,7 +34,7 @@ class MessageModel
                 (SELECT sender_id FROM messages WHERE (sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id) ORDER BY timestamp DESC LIMIT 1) as last_sender_id
             FROM messages 
             WHERE sender_id = :user OR receiver_id = :user
-            GROUP BY user_id
+            GROUP BY user_id ORDER BY timestamp DESC
         ");
         $stmt->execute([':user' => $userId]);
         $chats = array();
@@ -67,4 +67,6 @@ class MessageModel
         $stmt->execute([':user' => $userId]);
         return $stmt->fetchColumn();
     }
+
+
 }
