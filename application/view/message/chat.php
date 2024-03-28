@@ -73,7 +73,6 @@
                 appendMessage(newMessage);
             });
 
-
             // when the chat history is hovered, focus on it to enable scrolling with the mouse wheel
             $('.chat-history').hover(function () {
                 $(this).focus();

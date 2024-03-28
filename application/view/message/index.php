@@ -5,7 +5,9 @@
         <button id="addButton" style="background-color: green; color: white;">Add</button>
     </div>
     <span>You have
-        <?= $data['unreadCount'] ?> unread messages.
+        <span id="AllUnreadCount">
+            <?= $data['unreadCount'] ?>
+        </span> unread messages.
     </span>
 
     <!-- Modal -->
@@ -30,6 +32,39 @@
 
     <script>
         $(document).ready(function () {
+            var pusher = new Pusher('6f54e32cbe2ebd14f7d6', {
+                cluster: 'eu'
+            });
+
+
+            // foreach data['users'] user subscribe to the channel
+            <?php foreach ($data['users'] as $user): ?>
+                var channel = pusher.subscribe('chat_sender<?= Session::get('user_id') ?>receiver<?= $user->user_id ?>');
+                channel.bind('message', function (data) {
+                    let newMessage = data.message;
+                    let AllCountElement = $('#AllUnreadCount')
+                    let countElement = $('#unreadCount<?= $user->user_id ?>')
+                    let lastMessageElement = $('#lastMessage<?= $user->user_id ?>')
+                    let timestampElement = $('#timestamp<?= $user->user_id ?>')
+                    let receiverName = $('#receiverName<?= $user->user_id ?>');
+
+                    AllCountElement.text(parseInt(AllCountElement.text()) + 1);
+                    countElement.text(parseInt(countElement.text()) + 1);
+                    // if data.sender equals the php $user->user_id the name should be 'You', otherwise receiverName
+                    let name = (newMessage.sender_id == '<?= $user->user_id ?>' ? 'You' : receiverName);
+                    lastMessageElement.text(name + ": " + newMessage.message);
+
+                    timestampElement.text(new Date(newMessage.timestamp).toLocaleString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric',
+                        minute: 'numeric', hour12: true, hourCycle: 'h12'
+                    })
+                        .replace(' at', ',')
+                        .replace(' AM', ' am')
+                        .replace(' PM', ' pm')
+                    );
+                });
+            <?php endforeach; ?>
+
             $('#user_search').select2({
                 templateResult: formatUser,
                 templateSelection: formatUserSelection
@@ -193,23 +228,25 @@
             <div class="chat-card">
                 <div style="position: relative;">
                     <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
-                    <?php if ($chat->unreadCount > 0): ?>
-                        <div
-                            style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;">
-                            <?= $chat->unreadCount ?>
-                        </div>
-                    <?php endif; ?>
+                    <div id="unreadCount<?= $chat->user_id ?>" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;
+                        <?php if (!$chat->unreadCount > 0): ?>
+                            visibility: hidden;
+                        <?php endif; ?>
+                        ">
+                        <?= $chat->unreadCount ?>
+                    </div>
+
                 </div>
                 <div>
                     <div class="info">
-                        <div class="name">
+                        <div id="receiverName<?= $chat->user_id ?>" class="name">
                             <?= $chat->user_name ?>
                         </div>
-                        <div class="timestamp">
+                        <div id="timestamp<?= $chat->user_id ?>" class="timestamp">
                             <?= date('F j, Y, g:i a', strtotime($chat->timestamp)) ?>
                         </div>
                     </div>
-                    <div class="last-message">
+                    <div id="lastMessage<?= $chat->user_id ?>" class="last-message">
                         <?= $chat->last_message ?>
                     </div>
                     <a href="<?= Config::get('URL') ?>message/chat/<?= $chat->user_id ?>" class="stretched-link"></a>
