@@ -103,14 +103,6 @@
     </script>
 
     <h2>Recent</h2>
-    <!-- <?php if (!$message['read_status']): ?>
-        <form action="<?= Config::get('URL') ?>message/markAsRead" method="post">
-            <input type="hidden" name="message_id" value="<?= $message['id'] ?>">
-            <input type="submit" value="Mark as Read">
-        </form>
-    <?php endif; ?> -->
-
-
     <style>
         .modal {
             display: none;
@@ -150,6 +142,16 @@
             padding: 10px;
             border-bottom: 1px solid #ddd;
             position: relative;
+            max-height: 70px;
+            max-width: 876px;
+            overflow: hidden;
+        }
+
+        .last-message {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 350px;
         }
 
         .chat-card img {
