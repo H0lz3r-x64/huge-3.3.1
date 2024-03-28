@@ -35,13 +35,23 @@ class MessageController extends Controller
 
     public function sendMessage()
     {
-        MessageModel::sendMessage(
-            Session::get('user_id'),
-            Request::post('receiver_id'),
-            Request::post('message')
-        );
+        try {
+            $message = Request::post('message');
 
-        Redirect::to('message');
+            if (empty($message)) {
+                throw new Exception('Message cannot be empty.');
+            }
+
+            MessageModel::sendMessage(
+                Session::get('user_id'),
+                Request::post('receiver_id'),
+                $message
+            );
+
+            echo json_encode(['status' => 'success']);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 
     public function markAsRead()
