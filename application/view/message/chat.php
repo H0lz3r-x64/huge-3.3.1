@@ -126,6 +126,20 @@
                 });
             });
 
+            $('#message-text').on('keydown', function (e) {
+                // Check if the Enter key was pressed
+                if (e.key === 'Enter') {
+                    // Check if the Shift key was not held down
+                    if (!e.shiftKey) {
+                        // Prevent the default action (newline)
+                        e.preventDefault();
+
+                        // Submit the form
+                        $('#message-form').submit();
+                    }
+                }
+            });
+
         });
     </script>
 
