@@ -38,29 +38,41 @@
     </div>
 
     <script>
-        $(document).ready(function () {
-            // sends an AJAX request to the markAsRead method when the chat view is loaded.
+        function markAsRead(receiverId) {
             $.ajax({
                 url: '<?= Config::get('URL') ?>message/markAsRead',
                 type: 'post',
                 data: {
-                    receiver_id: '<?= $data['user']->user_id ?>'
+                    receiver_id: receiverId
                 }
             });
+        }
+
+        function appendMessage(message) {
+            var messageTime = new Date(message.timestamp).toLocaleString('en-US', {
+                month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric',
+                minute: 'numeric', hour12: true, hourCycle: 'h12'
+            })
+                .replace(' at', ',')
+                .replace(' AM', ' am')
+                .replace(' PM', ' pm');
+            var messageClass = message.sender_id == '<?= Session::get('user_id') ?>' ? 'sent' : 'received';
+            var messageHtml = '<div class="message ' + messageClass + '">' +
+                '<div class="message-content">' + message.message + '</div>' +
+                '<div class="message-timestamp">' + messageTime + '</div>' +
+                '</div>';
+            $('.message-container').append(messageHtml);
+            // scroll the history down on page load and after new message got sent
+            $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
+            markAsRead('<?= $data['user']->user_id ?>');
+        }
+
+        $(document).ready(function () {
+            markAsRead('<?= $data['user']->user_id ?>');
 
             // scroll the history down on page load and after new message got sent
             $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
 
-            function appendMessage(message) {
-                var messageClass = message.sender_id == '<?= Session::get('user_id') ?>' ? 'sent' : 'received';
-                var messageHtml = '<div class="message ' + messageClass + '">' +
-                    '<div class="message-content">' + message.message + '</div>' +
-                    '<div class="message-timestamp">' + message.timestamp + '</div>' +
-                    '</div>';
-                $('.message-container').append(messageHtml);
-                // scroll the history down on page load and after new message got sent
-                $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
-            }
 
             var pusher = new Pusher('6f54e32cbe2ebd14f7d6', {
                 cluster: 'eu'
@@ -70,7 +82,11 @@
             channel.bind('message', function (data) {
                 // Fetch new messages
                 var newMessage = data.message;
-                appendMessage(newMessage);
+
+                // Check if the sender of the message is not the current user
+                if (newMessage.sender_id != '<?= Session::get('user_id') ?>') {
+                    appendMessage(newMessage);
+                }
             });
 
             // when the chat history is hovered, focus on it to enable scrolling with the mouse wheel
@@ -81,24 +97,34 @@
             $('#message-form').on('submit', function (e) {
                 e.preventDefault();
 
+                // Get the message text
+                var messageText = $('#message-text').val();
+
+
+                // Clear the message input
+                $('#message-text').val('');
+
+                // Send the message
                 $.ajax({
                     url: '<?= Config::get('URL') ?>message/sendMessage',
                     type: 'post',
                     data: {
                         receiver_id: $('#receiver_id').val(),
-                        message: $('#message-text').val()
-                    },
-                    success: function (response) {
-                        // Clear the message input
-                        $('#message-text').val('');
+                        message: messageText
                     },
                     error: function (xhr, status, error) {
                         console.log('An error occurred: ' + error);
                         alert('An error occurred: ' + error);
                     }
                 });
-            });
 
+                // Append the message to the chat immediately
+                appendMessage({
+                    message: messageText,
+                    timestamp: new Date(),
+                    sender_id: '<?= Session::get('user_id') ?>'
+                });
+            });
 
         });
     </script>

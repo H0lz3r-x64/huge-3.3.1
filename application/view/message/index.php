@@ -46,15 +46,14 @@
                     let countElement = $('#unreadCount<?= $user->user_id ?>')
                     let lastMessageElement = $('#lastMessage<?= $user->user_id ?>')
                     let timestampElement = $('#timestamp<?= $user->user_id ?>')
-                    let receiverName = $('#receiverName<?= $user->user_id ?>');
+                    let receiverName = $('#receiverName<?= $user->user_id ?>').text().trim();
 
                     AllCountElement.text(parseInt(AllCountElement.text()) + 1);
                     countElement.text(parseInt(countElement.text()) + 1);
                     // set visbility of countElement based on its value
                     countElement.css('visibility', parseInt(countElement.text()) > 0 ? 'visible' : 'hidden');
 
-                    // if data.sender equals the php $user->user_id the name should be 'You', otherwise receiverName
-                    let name = (newMessage.sender_id == '<?= $user->user_id ?>' ? 'You' : receiverName);
+                    let name = (newMessage.sender_id == '<?= $user->user_id ?>' ? receiverName : 'You');
                     lastMessageElement.text(name + ": " + newMessage.message);
 
                     timestampElement.text(new Date(newMessage.timestamp).toLocaleString('en-US', {
@@ -65,6 +64,18 @@
                         .replace(' AM', ' am')
                         .replace(' PM', ' pm')
                     );
+
+                    // slightly color the card of the user who has sent you a message
+                    $('#unreadCount<?= $user->user_id ?>').parent().parent().css('background-color', 'rgba(0, 128, 0, 0.1)');
+
+                    // sort the chat cards based on the timestamp
+                    var cards = $('.chat-card');
+                    cards.sort(function (a, b) {
+                        var timestampA = new Date($(a).find('.timestamp').text()).getTime();
+                        var timestampB = new Date($(b).find('.timestamp').text()).getTime();
+                        return timestampB - timestampA;
+                    });
+                    cards.detach().appendTo('#chat-list');
                 });
             <?php endforeach; ?>
 
@@ -226,7 +237,7 @@
         }
     </style>
 
-    <div class="container" style="margin-top: 0px;">
+    <div id="chat-list" class="container" style="margin-top: 0px;">
         <?php foreach ($data['chats'] as $chat): ?>
             <div class="chat-card">
                 <div style="position: relative;">
