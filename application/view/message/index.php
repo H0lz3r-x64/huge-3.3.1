@@ -50,6 +50,9 @@
 
                     AllCountElement.text(parseInt(AllCountElement.text()) + 1);
                     countElement.text(parseInt(countElement.text()) + 1);
+                    // set visbility of countElement based on its value
+                    countElement.css('visibility', parseInt(countElement.text()) > 0 ? 'visible' : 'hidden');
+
                     // if data.sender equals the php $user->user_id the name should be 'You', otherwise receiverName
                     let name = (newMessage.sender_id == '<?= $user->user_id ?>' ? 'You' : receiverName);
                     lastMessageElement.text(name + ": " + newMessage.message);
