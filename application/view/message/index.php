@@ -239,7 +239,12 @@
 
     <div id="chat-list" class="container" style="margin-top: 0px;">
         <?php foreach ($data['chats'] as $chat): ?>
-            <div class="chat-card">
+            <div class="chat-card" style="
+                <?php if ($chat->unreadCount > 0): ?>
+                    background-color: rgba(0, 128, 0, 0.1);
+                <?php endif; ?>
+                ">
+
                 <div style="position: relative;">
                     <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
                     <div id="unreadCount<?= $chat->user_id ?>" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;
