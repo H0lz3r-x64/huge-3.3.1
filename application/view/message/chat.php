@@ -134,8 +134,17 @@
                         // Prevent the default action (newline)
                         e.preventDefault();
 
-                        // Submit the form
-                        $('#message-form').submit();
+                        // Get the message text
+                        var messageText = $('#message-text').val().trim();
+
+                        // Check if messageText is not empty
+                        if (messageText) {
+                            // Submit the form
+                            $('#message-form').submit();
+                        } else {
+                            // If the message text is empty, report form validity to trigger the built-in tooltip
+                            $('#message-form')[0].reportValidity();
+                        }
                     }
                 }
             });
