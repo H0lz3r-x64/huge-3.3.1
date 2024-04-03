@@ -17,18 +17,35 @@ class MessageController extends Controller
             array(
                 'unreadCount' => MessageModel::getUnreadCount(Session::get('user_id')),
                 'users' => UserModel::getPublicProfilesOfAllUsers(),
-                'chats' => MessageModel::getUsersUserMessaged(Session::get('user_id'))
+                'chats' => MessageModel::getUsersUserMessaged(Session::get('user_id')),
+                'groups' => MessageModel::getGroupsByUserId(Session::get('user_id'))
             )
         );
     }
 
     public function chat($receiver_id)
     {
+        $isGroup = false;
         $this->View->render(
             'message/chat',
             array(
                 'messages' => MessageModel::getMessagesByUser($receiver_id),
-                'user' => UserModel::getPublicProfileOfUser($receiver_id)
+                'user' => UserModel::getPublicProfileOfUser($receiver_id),
+                'isGroup' => $isGroup
+            )
+        );
+    }
+
+    public function groupchat($group_id)
+    {
+        $isGroup = true;
+        $this->View->render(
+            'message/chat',
+            array(
+                'messages' => MessageModel::getGroupMessages($group_id),
+                'group' => MessageModel::getGroupById($group_id),
+                'members' => MessageModel::getGroupMembers($group_id),
+                'isGroup' => $isGroup
             )
         );
     }
@@ -77,12 +94,60 @@ class MessageController extends Controller
         }
     }
 
+    public function sendMessageToGroup()
+    {
+        try {
+            $message = Request::post('message');
+            $sender_id = Session::get('user_id');
+            $group_id = Request::post('receiver_id');
+
+            if (empty($message)) {
+                throw new Exception('Message cannot be empty.');
+            }
+
+            $msgId = MessageModel::sendMessageToGroup($sender_id, $group_id, $message);
+            $new_message = MessageModel::getMessageById($msgId);
+
+            echo json_encode(['status' => 'success']);
+
+            // Trigger a Pusher event
+            $options = array(
+                'cluster' => 'eu',
+                'useTLS' => true
+            );
+            $pusher = new Pusher\Pusher(
+                '6f54e32cbe2ebd14f7d6',
+                '7820e477bc4efdabc29f',
+                '1778841',
+                $options
+            );
+
+            $data['message'] = $new_message;
+            // 1 channel; one for the group to receive the message
+            $chat_channel = 'group_chat_' . $group_id;
+            $pusher->trigger($chat_channel, 'message', $data);
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'errorMessage' => $e->getMessage()]);
+            return;
+        }
+    }
+
     public function markAsRead()
     {
         MessageModel::markAsRead(
             Session::get('user_id'),
             Request::post('receiver_id')
         );
+
+        echo json_encode(['status' => 'success']);
+    }
+
+    public function markGroupMessagesAsRead()
+    {
+        $user_id = Session::get('user_id');
+        $group_id = Request::post('group_id');
+
+        MessageModel::markGroupMessagesAsRead($user_id, $group_id);
 
         echo json_encode(['status' => 'success']);
     }

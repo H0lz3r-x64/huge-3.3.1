@@ -239,6 +239,7 @@
 
     <div id="chat-list" class="container" style="margin-top: 0px;">
         <?php foreach ($data['chats'] as $chat): ?>
+
             <div class="chat-card" style="
                 <?php if ($chat->unreadCount > 0): ?>
                     background-color: rgba(0, 128, 0, 0.1);
@@ -246,7 +247,9 @@
                 ">
 
                 <div style="position: relative;">
-                    <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
+                    <?php if (!empty($chat->user_avatar_link)): ?>
+                        <img src="<?= $chat->user_avatar_link ?>" alt="user avatar">
+                    <?php endif; ?>
                     <div id="unreadCount<?= $chat->user_id ?>" style="position: absolute; top: -5px; right: -5px; background-color: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px;
                         <?php if (!$chat->unreadCount > 0): ?>
                             visibility: hidden;
@@ -269,6 +272,27 @@
                         <?= $chat->last_message ?>
                     </div>
                     <a href="<?= Config::get('URL') ?>message/chat/<?= $chat->user_id ?>" class="stretched-link"></a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+        <?php foreach ($data['groups'] as $group): ?>
+            <div class="chat-card">
+                <div style="position: relative;">
+                    <img src="" alt="group avatar">
+                </div>
+                <div>
+                    <div class="info">
+                        <div class="name">
+                            <?= $group->group_name ?>
+                        </div>
+                        <div class="timestamp">
+                            <?= date('F j, Y, g:i a', strtotime($group->timestamp)) ?>
+                        </div>
+                    </div>
+                    <div class="last-message">
+                        <?= $group->last_message ?>
+                    </div>
+                    <a href="<?= Config::get('URL') ?>message/groupchat/<?= $group->group_id ?>" class="stretched-link"></a>
                 </div>
             </div>
         <?php endforeach; ?>

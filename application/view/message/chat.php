@@ -1,11 +1,15 @@
 <div class="container">
     <!-- Info bar -->
     <div class="chat-card">
-
-        <img src="<?= $data['user']->user_avatar_link ?>" alt="user avatar">
+        <!-- Display group avatar for group chats -->
+        <?php if ($data['isGroup'] ? !empty($data['group']->group_avatar_link) : !empty($data['user']->user_avatar_link)): ?>
+            <img src="<?= $data['isGroup'] ? $data['group']->group_avatar_link : $data['user']->user_avatar_link ?>"
+                alt="user avatar">
+        <?php endif; ?>
         <div class="info">
             <div class="name">
-                <?= $data['user']->user_name ?>
+                <!-- Display group name for group chats -->
+                <?= $data['isGroup'] ? $data['group']->group_name : $data['user']->user_name ?>
             </div>
         </div>
         <!-- Go Back button -->
@@ -18,6 +22,11 @@
         <div class="message-container">
             <?php foreach ($data['messages'] as $message): ?>
                 <div class="message <?= $message['sender_id'] == Session::get('user_id') ? 'sent' : 'received' ?>">
+                    <?php if ($data['isGroup']): ?>
+                        <div class="message-sender">
+                            <?= $message['sender_name'] ?>
+                        </div>
+                    <?php endif; ?>
                     <div class="message-content">
                         <?= htmlentities($message['message']) ?>
                     </div>
@@ -31,16 +40,18 @@
 
     <div class="chat-control">
         <form id="message-form" class="message-form">
-            <input type="hidden" name="receiver_id" id="receiver_id" value="<?= $data['user']->user_id ?>">
+            <input type="hidden" id="is_group" value="<?= $data['isGroup'] ? 'true' : 'false' ?>">
+            <input type="hidden" name="receiver_id" id="receiver_id"
+                value="<?= $data['isGroup'] ? $data['group']->group_id : $data['user']->user_id ?>">
             <textarea name="message-text" id="message-text" placeholder="Type a message..." required></textarea>
             <button type="submit">Send</button>
         </form>
     </div>
 
     <script>
-        function markAsRead(receiverId) {
+        function markAsRead(receiverId, isGroup) {
             $.ajax({
-                url: '<?= Config::get('URL') ?>message/markAsRead',
+                url: isGroup ? '<?= Config::get('URL') ?>message/markGroupMessagesAsRead' : '<?= Config::get('URL') ?>message/markAsRead',
                 type: 'post',
                 data: {
                     receiver_id: receiverId
@@ -58,17 +69,21 @@
                 .replace(' PM', ' pm');
             var messageClass = message.sender_id == '<?= Session::get('user_id') ?>' ? 'sent' : 'received';
             var messageHtml = '<div class="message ' + messageClass + '">' +
-                '<div class="message-content">' + message.message + '</div>' +
+                <?php if ($data['isGroup']): ?>
+                '<div class="message-sender">' + message.sender_name + '</div>' +
+                <?php endif; ?>
+            '<div class="message-content">' + message.message + '</div>' +
                 '<div class="message-timestamp">' + messageTime + '</div>' +
                 '</div>';
             $('.message-container').append(messageHtml);
             // scroll the history down on page load and after new message got sent
             $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
-            markAsRead('<?= $data['user']->user_id ?>');
+
+            markAsRead('<?= $data['isGroup'] ? $data['group']->group_id : $data['user']->user_id ?>');
         }
 
         $(document).ready(function () {
-            markAsRead('<?= $data['user']->user_id ?>');
+            markAsRead('<?= $data['isGroup'] ? $data['group']->group_id : $data['user']->user_id ?>');
 
             // scroll the history down on page load and after new message got sent
             $('.message-container').scrollTop($('.message-container')[0].scrollHeight);
@@ -78,7 +93,7 @@
                 cluster: 'eu'
             });
 
-            var channel = pusher.subscribe('chat_sender<?= Session::get('user_id') ?>receiver<?= $data['user']->user_id ?>');
+            var channel = pusher.subscribe('chat_sender<?= Session::get('user_id') ?>receiver<?= $data['isGroup'] ? $data['group']->group_id : $data['user']->user_id ?>');
             channel.bind('message', function (data) {
                 // Fetch new messages
                 var newMessage = data.message;
@@ -100,13 +115,15 @@
                 // Get the message text
                 var messageText = $('#message-text').val();
 
-
                 // Clear the message input
                 $('#message-text').val('');
 
+                // Check if it's a group chat
+                var isGroup = $('#is_group').val() === 'true';
+
                 // Send the message
                 $.ajax({
-                    url: '<?= Config::get('URL') ?>message/sendMessage',
+                    url: isGroup ? '<?= Config::get('URL') ?>message/sendMessageToGroup' : '<?= Config::get('URL') ?>message/sendMessage',
                     type: 'post',
                     data: {
                         receiver_id: $('#receiver_id').val(),
@@ -118,11 +135,13 @@
                     }
                 });
 
+
                 // Append the message to the chat immediately
                 appendMessage({
                     message: messageText,
                     timestamp: new Date(),
-                    sender_id: '<?= Session::get('user_id') ?>'
+                    sender_id: '<?= Session::get('user_id') ?>',
+                    sender_name: '<?= Session::get('user_name') ?>'
                 });
             });
 
@@ -153,6 +172,11 @@
     </script>
 
     <style>
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
         .go-back-button {
             justify-self: end;
             /* Change this from left to right */
