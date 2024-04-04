@@ -4,34 +4,30 @@ class MessageModel
     public static function sendMessage($senderId, $receiverId, $message): int
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("INSERT INTO messages (sender_id, receiver_id, message, timestamp, read_status) VALUES (:sender, :receiver, :message, NOW(), 0)");
+        $stmt = $db->prepare("CALL sendMessage(:sender, :receiver, :message)");
         $stmt->execute([':sender' => $senderId, ':receiver' => $receiverId, ':message' => $message]);
-
-        // Return the ID of the new auto-incremented message
         return $db->lastInsertId();
     }
 
     public static function sendMessageToGroup($senderId, $groupId, $message)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("INSERT INTO messages (sender_id, group_id, message, timestamp, read_status) VALUES (:sender, :group, :message, NOW(), 0)");
+        $stmt = $db->prepare("CALL sendMessageToGroup(:sender, :group, :message)");
         $stmt->execute([':sender' => $senderId, ':group' => $groupId, ':message' => $message]);
-
-        // Return the ID of the new auto-incremented message
         return $db->lastInsertId();
     }
 
     public static function markGroupMessagesAsRead($userId, $groupId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("UPDATE messages SET read_status = 1 WHERE group_id = :group_id AND receiver_id = :user_id AND read_status = 0");
+        $stmt = $db->prepare("CALL markGroupMessagesAsRead(:group_id, :user_id)");
         $stmt->execute([':group_id' => $groupId, ':user_id' => $userId]);
     }
 
     public static function getMessageById($id)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT DISTINCT * FROM messages WHERE id = :id");
+        $stmt = $db->prepare("CALL getMessageById(:id)");
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }
@@ -39,35 +35,21 @@ class MessageModel
     public static function getMessagesByUser($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-
-        if ($userId == Session::get('user_id')) {
-            // If chatting with self, only select messages where both sender_id and receiver_id are the user's ID
-            $stmt = $db->prepare("SELECT * FROM messages WHERE sender_id = :user AND receiver_id = :user ORDER BY timestamp ASC");
-        } else {
-            // Otherwise, select messages where either sender_id or receiver_id is the user's ID and the other is the other user's ID
-            $stmt = $db->prepare("SELECT * FROM messages WHERE (sender_id = :user AND receiver_id = :other) OR (sender_id = :other AND receiver_id = :user) ORDER BY timestamp ASC");
-        }
-
-        $stmt->execute([':user' => Session::get('user_id'), ':other' => $userId]);
+        $stmt = $db->prepare("CALL getMessagesByUser(:user_id, :session_user_id)");
+        $stmt->execute([':user_id' => $userId, ':session_user_id' => Session::get('user_id')]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getUsersUserMessaged($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT CASE 
-                WHEN sender_id = :user THEN receiver_id ELSE sender_id END AS user_id, MAX(timestamp) as timestamp,
-                (SELECT message FROM messages WHERE ((sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id)) AND group_id IS NULL ORDER BY timestamp DESC LIMIT 1) as last_message,
-                (SELECT sender_id FROM messages WHERE ((sender_id = user_id AND receiver_id = :user) OR (sender_id = :user AND receiver_id = user_id)) AND group_id IS NULL ORDER BY timestamp DESC LIMIT 1) as last_sender_id,
-                (SELECT COUNT(*) FROM messages WHERE receiver_id = :user AND sender_id = user_id AND read_status = 0 AND group_id IS NULL) as unreadCount
-            FROM messages 
-            WHERE (sender_id = :user OR receiver_id = :user) AND (sender_id IS NOT NULL AND receiver_id IS NOT NULL) 
-            GROUP BY user_id ORDER BY timestamp DESC
-        ");
+        $stmt = $db->prepare("CALL getUsersUserMessaged(:user)");
         $stmt->execute([':user' => $userId]);
+        $return = $stmt->fetchAll(PDO::FETCH_CLASS);
+        $stmt->closeCursor();
         $chats = array();
 
-        foreach ($stmt->fetchAll() as $chat) {
+        foreach ($return as $chat) {
             array_walk_recursive($chat, 'Filter::XSSFilter');
 
             $userdata = UserModel::getPublicProfileOfUser($chat->user_id);
@@ -80,66 +62,45 @@ class MessageModel
             $chats[$chat->user_id]->unreadCount = $chat->unreadCount;
         }
         return $chats;
+
     }
 
     public static function markAsRead($userId, $senderId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("UPDATE messages SET read_status = 1 WHERE receiver_id = :receiver_id AND sender_id = :sender_id AND read_status = 0");
+        $stmt = $db->prepare("CALL markAsRead(:receiver_id, :sender_id)");
         $stmt->execute([':receiver_id' => $userId, ':sender_id' => $senderId]);
     }
 
     public static function getUnreadCount($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT COUNT(*) FROM messages WHERE receiver_id = :user AND read_status = 0");
-        $stmt->execute([':user' => $userId]);
+        $stmt = $db->prepare("CALL getUnreadCount(:user_id)");
+        $stmt->execute([':user_id' => $userId]);
         return $stmt->fetchColumn();
     }
 
     public static function getNewMessages($receiverId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM messages WHERE receiver_id = :receiver_id AND read_status = 0");
+        $stmt = $db->prepare("CALL getNewMessages(:receiver_id)");
         $stmt->execute([':receiver_id' => $receiverId]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    public static function createGroup($name, $firstUser)
-    {
-        $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("INSERT INTO groups (name) VALUES (:name)");
-        $stmt->execute([':name' => $name]);
-        $groupId = $db->lastInsertId();
-
-        $stmt = $db->prepare("INSERT INTO group_members (group_id, user_id) VALUES (:group_id, :user_id)");
-        $stmt->execute([':group_id' => $groupId, ':user_id' => $firstUser]);
-
-        return $groupId;
     }
 
     public static function getGroups()
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT * FROM groups");
+        $stmt = $db->prepare("CALL getGroups()");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public static function getGroupById($groupId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT 
-            g.id as group_id, 
-            g.name as group_name,
-            (SELECT MAX(timestamp) FROM messages WHERE group_id = g.id) as timestamp,
-            (SELECT message FROM messages WHERE group_id = g.id ORDER BY timestamp DESC LIMIT 1) as last_message,
-            (SELECT sender_id FROM messages WHERE group_id = g.id ORDER BY timestamp DESC LIMIT 1) as last_sender_id,
-            (SELECT COUNT(*) FROM messages WHERE group_id = g.id AND read_status = 0 AND receiver_id = :user_id) as unreadCount
-        FROM groups g 
-        WHERE g.id = :group_id
-        ");
-
-        $stmt->execute([':user_id' => Session::get('user_id'), ':group_id' => $groupId]);
+        $stmt = $db->prepare("CALL getGroupById(:group_id, :user_id)");
+        $stmt->execute([':group_id' => $groupId, ':user_id' => Session::get('user_id')]);
         $group = $stmt->fetch();
 
         if ($group) {
@@ -162,23 +123,13 @@ class MessageModel
     public static function getGroupsByUserId($userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT 
-            g.id as group_id, 
-            g.name as group_name,
-            (SELECT MAX(timestamp) FROM messages WHERE group_id = g.id) as timestamp,
-            (SELECT message FROM messages WHERE group_id = g.id ORDER BY timestamp DESC LIMIT 1) as last_message,
-            (SELECT sender_id FROM messages WHERE group_id = g.id ORDER BY timestamp DESC LIMIT 1) as last_sender_id,
-            (SELECT COUNT(*) FROM messages WHERE group_id = g.id AND read_status = 0 AND receiver_id = :user_id) as unreadCount
-        FROM groups g 
-        JOIN group_members gm ON g.id = gm.group_id 
-        WHERE gm.user_id = :user_id
-        GROUP BY group_id 
-        ORDER BY timestamp DESC
-    ");
+        $stmt = $db->prepare("CALL getGroupsByUserId(:user_id)");
         $stmt->execute([':user_id' => $userId]);
+        $return = $stmt->fetchAll(PDO::FETCH_CLASS);
+        $stmt->closeCursor();
         $groups = array();
 
-        foreach ($stmt->fetchAll() as $group) {
+        foreach ($return as $group) {
             array_walk_recursive($group, 'Filter::XSSFilter');
 
             $groups[$group->group_id] = new stdClass();
@@ -195,7 +146,7 @@ class MessageModel
     public static function getGroupMembers($groupId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT u.* FROM users u JOIN group_members gm ON u.user_id = gm.user_id WHERE gm.group_id = :group_id");
+        $stmt = $db->prepare("CALL getGroupMembers(:group_id)");
         $stmt->execute([':group_id' => $groupId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -203,37 +154,28 @@ class MessageModel
     public static function addGroupMember($groupId, $userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("INSERT INTO group_members (group_id, user_id) VALUES (:group_id, :user_id)");
+        $stmt = $db->prepare("CALL addGroupMember(:group_id, :user_id)");
         $stmt->execute([':group_id' => $groupId, ':user_id' => $userId]);
     }
 
     public static function removeGroupMember($groupId, $userId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("DELETE FROM group_members WHERE group_id = :group_id AND user_id = :user_id");
+        $stmt = $db->prepare("CALL removeGroupMember(:group_id, :user_id)");
         $stmt->execute([':group_id' => $groupId, ':user_id' => $userId]);
     }
 
-    // delete group and everything related to it
     public static function deleteGroup($groupId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("DELETE FROM groups WHERE id = :id");
-        $stmt->execute([':id' => $groupId]);
-
-        $stmt = $db->prepare("DELETE FROM group_members WHERE group_id = :group_id");
-        $stmt->execute([':group_id' => $groupId]);
-
-        $stmt = $db->prepare("DELETE FROM messages WHERE group_id = :group_id");
+        $stmt = $db->prepare("CALL deleteGroup(:group_id)");
         $stmt->execute([':group_id' => $groupId]);
     }
 
     public static function getGroupMessages($groupId)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $stmt = $db->prepare("SELECT messages.*, users.user_name as sender_name FROM messages 
-                              JOIN users ON messages.sender_id = users.user_id 
-                              WHERE group_id = :group_id ORDER BY timestamp ASC");
+        $stmt = $db->prepare("CALL getGroupMessages(:group_id)");
         $stmt->execute([':group_id' => $groupId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
