@@ -153,4 +153,18 @@ return array(
     'EMAIL_VERIFICATION_FROM_NAME' => 'My Project',
     'EMAIL_VERIFICATION_SUBJECT' => 'Account activation for PROJECT XY',
     'EMAIL_VERIFICATION_CONTENT' => 'Please click on this link to activate your account: ',
+
+    /**
+     * Gallery
+     */
+    // Path to gallery folder
+    'PATH_GALLERY' => realpath(dirname(__FILE__) . '/../../') . '/userpictures/',
+    // Allowed image types for upload
+    'GALLERY_ALLOWED_FILE_TYPES' => ['image/jpeg', 'image/png', 'image/gif'],
+    // Maximum file size for upload
+    'GALLERY_MAX_FILE_SIZE' => 5 * 1024 * 1024,
+    // Maximum image width for upload
+    'GALLERY_MAX_IMAGE_WIDTH' => 1920,
+    // Maximum image height for upload
+    'GALLERY_MAX_IMAGE_HEIGHT' => 1080,
 );

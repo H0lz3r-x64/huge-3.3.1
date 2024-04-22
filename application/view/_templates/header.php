@@ -56,6 +56,11 @@
                 } ?>>
                     <a href="<?php echo Config::get('URL'); ?>message/index">Messenger</a>
                 </li>
+                <li <?php if (View::checkForActiveController($filename, "gallery")) {
+                    echo 'class="active"';
+                } ?>>
+                    <a href="<?php echo Config::get('URL'); ?>gallery/index">Gallery</a>
+                </li>
 
             <?php } else { ?>
                 <!-- for not logged in users -->

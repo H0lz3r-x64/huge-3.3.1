@@ -19,7 +19,7 @@ class LoginModel
     public static function login($user_name, $user_password, $set_remember_me_cookie = null)
     {
         // we do negative-first checks here, for simplicity empty username and empty password in one line
-        if (empty($user_name) OR empty($user_password)) {
+        if (empty($user_name) or empty($user_password)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_USERNAME_OR_PASSWORD_FIELD_EMPTY'));
             return false;
         }
@@ -41,7 +41,7 @@ class LoginModel
 
         // stop the user from logging in if user has a suspension, display how long they have left in the feedback.
         if ($result->user_suspension_timestamp != null && $result->user_suspension_timestamp - time() > 0) {
-            $suspensionTimer = Text::get('FEEDBACK_ACCOUNT_SUSPENDED') . round(abs($result->user_suspension_timestamp - time())/60/60, 2) . " hours left";
+            $suspensionTimer = Text::get('FEEDBACK_ACCOUNT_SUSPENDED') . round(abs($result->user_suspension_timestamp - time()) / 60 / 60, 2) . " hours left";
             Session::add('feedback_negative', $suspensionTimer);
             return false;
         }
@@ -61,7 +61,10 @@ class LoginModel
 
         // successfully logged in, so we write all necessary data into the session and set "user_logged_in" to true
         self::setSuccessfulLoginIntoSession(
-            $result->user_id, $result->user_name, $result->user_email, $result->user_account_type
+            $result->user_id,
+            $result->user_name,
+            $result->user_email,
+            $result->user_account_type
         );
 
         // return true to make clear the login was successful
@@ -83,7 +86,7 @@ class LoginModel
         // brute force attack mitigation: use session failed login count and last failed login for not found users.
         // block login attempt if somebody has already failed 3 times and the last login attempt is less than 30sec ago
         // (limits user searches in database)
-        if (Session::get('failed-login-count') >= 3 AND (Session::get('last-failed-login') > (time() - 30))) {
+        if (Session::get('failed-login-count') >= 3 and (Session::get('last-failed-login') > (time() - 30))) {
             Session::add('feedback_negative', Text::get('FEEDBACK_LOGIN_FAILED_3_TIMES'));
             return false;
         }
@@ -104,7 +107,7 @@ class LoginModel
         }
 
         // block login attempt if somebody has already failed 3 times and the last login attempt is less than 30sec ago
-        if (($result->user_failed_logins >= 3) AND ($result->user_last_failed_login > (time() - 30))) {
+        if (($result->user_failed_logins >= 3) and ($result->user_last_failed_login > (time() - 30))) {
             Session::add('feedback_negative', Text::get('FEEDBACK_PASSWORD_WRONG_3_TIMES'));
             return false;
         }
@@ -166,18 +169,18 @@ class LoginModel
         }
 
         // before list(), check it can be split into 3 strings.
-        if (count (explode(':', $cookie)) !== 3) {
+        if (count(explode(':', $cookie)) !== 3) {
             Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
             return false;
         }
 
         // check cookie's contents, check if cookie contents belong together or token is empty
-        list ($user_id, $token, $hash) = explode(':', $cookie);
+        list($user_id, $token, $hash) = explode(':', $cookie);
 
         // decrypt user id
         $user_id = Encryption::decrypt($user_id);
 
-        if ($hash !== hash('sha256', $user_id . ':' . $token) OR empty($token) OR empty($user_id)) {
+        if ($hash !== hash('sha256', $user_id . ':' . $token) or empty($token) or empty($user_id)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_COOKIE_INVALID'));
             return false;
         }
@@ -258,8 +261,15 @@ class LoginModel
         // set session cookie setting manually,
         // Why? because you need to explicitly set session expiry, path, domain, secure, and HTTP.
         // @see https://www.owasp.org/index.php/PHP_Security_Cheat_Sheet#Cookies
-        setcookie(session_name(), session_id(), time() + Config::get('SESSION_RUNTIME'), Config::get('COOKIE_PATH'),
-            Config::get('COOKIE_DOMAIN'), Config::get('COOKIE_SECURE'), Config::get('COOKIE_HTTP'));
+        setcookie(
+            session_name(),
+            session_id(),
+            time() + Config::get('SESSION_RUNTIME'),
+            Config::get('COOKIE_PATH'),
+            Config::get('COOKIE_DOMAIN'),
+            Config::get('COOKIE_SECURE'),
+            Config::get('COOKIE_HTTP')
+        );
 
     }
 
@@ -277,7 +287,7 @@ class LoginModel
                  WHERE user_name = :user_name OR user_email = :user_name
                  LIMIT 1";
         $sth = $database->prepare($sql);
-        $sth->execute(array(':user_name' => $user_name, ':user_last_failed_login' => time() ));
+        $sth->execute(array(':user_name' => $user_name, ':user_last_failed_login' => time()));
     }
 
     /**
@@ -334,15 +344,22 @@ class LoginModel
         // generate cookie string that consists of user id, random string and combined hash of both
         // never expose the original user id, instead, encrypt it.
         $cookie_string_first_part = Encryption::encrypt($user_id) . ':' . $random_token_string;
-        $cookie_string_hash       = hash('sha256', $user_id . ':' . $random_token_string);
-        $cookie_string            = $cookie_string_first_part . ':' . $cookie_string_hash;
+        $cookie_string_hash = hash('sha256', $user_id . ':' . $random_token_string);
+        $cookie_string = $cookie_string_first_part . ':' . $cookie_string_hash;
 
         // set cookie, and make it available only for the domain created on (to avoid XSS attacks, where the
         // attacker could steal your remember-me cookie string and would login itself).
         // If you are using HTTPS, then you should set the "secure" flag (the second one from right) to true, too.
         // @see http://www.php.net/manual/en/function.setcookie.php
-        setcookie('remember_me', $cookie_string, time() + Config::get('COOKIE_RUNTIME'), Config::get('COOKIE_PATH'),
-            Config::get('COOKIE_DOMAIN'), Config::get('COOKIE_SECURE'), Config::get('COOKIE_HTTP'));
+        setcookie(
+            'remember_me',
+            $cookie_string,
+            time() + Config::get('COOKIE_RUNTIME'),
+            Config::get('COOKIE_PATH'),
+            Config::get('COOKIE_DOMAIN'),
+            Config::get('COOKIE_SECURE'),
+            Config::get('COOKIE_HTTP')
+        );
     }
 
     /**
@@ -366,8 +383,15 @@ class LoginModel
         }
 
         // delete remember_me cookie in browser
-        setcookie('remember_me', false, time() - (3600 * 24 * 3650), Config::get('COOKIE_PATH'),
-            Config::get('COOKIE_DOMAIN'), Config::get('COOKIE_SECURE'), Config::get('COOKIE_HTTP'));
+        setcookie(
+            'remember_me',
+            false,
+            time() - (3600 * 24 * 3650),
+            Config::get('COOKIE_PATH'),
+            Config::get('COOKIE_DOMAIN'),
+            Config::get('COOKIE_SECURE'),
+            Config::get('COOKIE_HTTP')
+        );
     }
 
     /**

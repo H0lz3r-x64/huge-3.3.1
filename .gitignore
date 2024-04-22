@@ -8,3 +8,4 @@
 /public/avatars/
 # don't commit the node_modules folder
 /node_modules/
+userpictures/
