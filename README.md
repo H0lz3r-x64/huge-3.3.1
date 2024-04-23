@@ -647,7 +647,4 @@ More here on Stackflow: [How to prevent favicon.ico requests?](http://stackoverf
 I'm also blogging at **[Dev Metal](http://www.dev-metal.com)**.
 
 
-<video width="320" height="240" controls>
-  <source src="https://github.com/H0lz3r-x64/H0lz3r-x64_public/blob/master/your_video_name.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
+![](https://github.com/H0lz3r-x64/H0lz3r-x64_public/blob/master/your_gif_name.gif)
