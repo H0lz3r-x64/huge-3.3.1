@@ -14,7 +14,7 @@ But other things have been modified or added as well.
 <img src="https://github.com/H0lz3r-x64/H0lz3r-x64/blob/main/chatting.gif" alt="Project showcase gif" title="Project showcase gif" width="700"/>
 
 ### UX
-<img src="https://github.com/H0lz3r-x64/H0lz3r-x64/blob/main/ux.gif" alt="Project showcase gif" title="Project showcase gif" width="700"/>
+<img src="https://github.com/H0lz3r-x64/H0lz3r-x64/blob/main/ux.gif" alt="Project showcase gif" title="Project showcase gif" width="450"/>
 
 ## Gallery Addon
 <img src="https://github.com/H0lz3r-x64/H0lz3r-x64/blob/main/gallery.gif" alt="Project showcase gif" title="Project showcase gif" width="700"/>
