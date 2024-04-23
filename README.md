@@ -56,30 +56,46 @@ Chris
 
 #### Quick-Index 
 
-+ [Features](#features)
-+ [Live-Demo](#live-demo)
-+ [Support](#support)
-+ [Follow the project](#follow)
-+ [License](#license)
-+ [Requirements](#requirements)
-+ [Auto-Installation](#auto-installation)
-    - [Auto-Installation in Vagrant](#auto-installation-vagrant) (also useful for 100% reproducible installation of HUGE)
-    - [Auto-Installation in Ubuntu 14.04 LTS server](#auto-installation-ubuntu)
-+ [Installation (Ubuntu 14.04 LTS)](#installation)
-    - [Quick Installation](#quick-installation)
-    - [Detailed Installation](#detailed-installation)
-    - [NGINX setup](#nginx-setup)
-    - [IIS setup](#iis-setup)
-+ [Documentation](#documentation)
-    - [How to use the user roles](#user_roles)
-    - [How to use the CSRF feature](#csrf)
-+ [Community-provided features & feature discussions](#community)
-+ [Future of the project, announcing soft EOL](#future)
-+ [Why is there no support forum anymore ?](#why-no-support-forum)
-+ [Zero tolerance for idiots, trolls and vandals](#zero-tolerance)
-+ [Contribute](#contribute)
-+ [Code-Quality scanner links](#code-quality)
-+ [Report a bug](#bug-report)
+- [HUGE](#huge)
+      - [HUGE has reached "soft End Of Life"](#huge-has-reached-soft-end-of-life)
+      - [Releases \& development](#releases--development)
+      - [Quick-Index](#quick-index)
+    - [The History of HUGE](#the-history-of-huge)
+    - [Features ](#features-)
+    - [Planned features](#planned-features)
+    - [Live-Demo ](#live-demo-)
+    - [Support the project ](#support-the-project-)
+    - [License ](#license-)
+    - [Requirements ](#requirements-)
+    - [Auto-Installations ](#auto-installations-)
+      - [Auto-Installation (in Vagrant) ](#auto-installation-in-vagrant-)
+      - [Auto-Installation in a naked Ubuntu 14.04 LTS server ](#auto-installation-in-a-naked-ubuntu-1404-lts-server-)
+    - [Installation ](#installation-)
+      - [Quick guide: ](#quick-guide-)
+      - [Detailed guide (Ubuntu 14.04 LTS): ](#detailed-guide-ubuntu-1404-lts-)
+      - [NGINX setup: ](#nginx-setup-)
+      - [IIS setup: ](#iis-setup-)
+      - [Testing with demo users](#testing-with-demo-users)
+    - [What the hell are .travis.yml, .scrutinizer.yml etc. ?](#what-the-hell-are-travisyml-scrutinizeryml-etc-)
+    - [Documentation ](#documentation-)
+      - [How to use the different user roles ](#how-to-use-the-different-user-roles-)
+      - [How to use the CSRF feature ](#how-to-use-the-csrf-feature-)
+      - [Can a user be logged in from multiple devices ?](#can-a-user-be-logged-in-from-multiple-devices-)
+      - [Troubleshooting \& Glitches](#troubleshooting--glitches)
+    - [Community-provided features \& feature discussions ](#community-provided-features--feature-discussions-)
+    - [Future of HUGE: Announcing "soft End Of Life" ](#future-of-huge-announcing-soft-end-of-life-)
+    - [Coding guideline behind HUGE](#coding-guideline-behind-huge)
+      - [List of features / ideas provided in tickets / pull requests](#list-of-features--ideas-provided-in-tickets--pull-requests)
+    - [Why is there no support forum (anymore) ? ](#why-is-there-no-support-forum-anymore--)
+    - [Zero tolerance for idiots, trolls and vandals! ](#zero-tolerance-for-idiots-trolls-and-vandals-)
+    - [Contribute ](#contribute-)
+    - [Code-Quality scanner links ](#code-quality-scanner-links-)
+    - [Found a bug (Responsible Disclosure) ? ](#found-a-bug-responsible-disclosure--)
+    - [Current and further development](#current-and-further-development)
+    - [Why you should use a favicon.ico in your project :)](#why-you-should-use-a-faviconico-in-your-project-)
+    - [Useful links](#useful-links)
+  - [Interesting links regarding user authentication and application security](#interesting-links-regarding-user-authentication-and-application-security)
+    - [My blog](#my-blog)
 
 ### The History of HUGE
 
@@ -629,3 +645,9 @@ More here on Stackflow: [How to prevent favicon.ico requests?](http://stackoverf
 ### My blog
 
 I'm also blogging at **[Dev Metal](http://www.dev-metal.com)**.
+
+
+<video width="320" height="240" controls>
+  <source src="https://github.com/H0lz3r-x64/H0lz3r-x64_public/blob/master/your_video_name.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
